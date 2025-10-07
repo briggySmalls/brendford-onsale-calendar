@@ -3,10 +3,11 @@
 import html
 import json
 import logging
-from typing import Any
 
 import requests
 from bs4 import BeautifulSoup
+
+from brentford_calendar.models import FixtureData
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def fetch_page(url: str = TICKETING_URL, timeout: int = 30) -> str:
     return response.text
 
 
-def extract_fixtures(html_content: str) -> list[dict[str, Any]]:
+def extract_fixtures(html_content: str) -> list[FixtureData]:
     """Extract fixture ticketing data from HTML.
 
     Parses HTML to find all divs with data-component="FixtureTicketingModule",
@@ -43,10 +44,11 @@ def extract_fixtures(html_content: str) -> list[dict[str, Any]]:
         html_content: Raw HTML content
 
     Returns:
-        List of fixture data dictionaries
+        List of FixtureData objects
 
     Raises:
         json.JSONDecodeError: If JSON parsing fails for any fixture
+        pydantic.ValidationError: If fixture data doesn't match schema
     """
     logger.info("Parsing HTML for fixture data")
     soup = BeautifulSoup(html_content, "html5lib")
@@ -66,9 +68,10 @@ def extract_fixtures(html_content: str) -> list[dict[str, Any]]:
         decoded_props = html.unescape(raw_props)
 
         try:
-            fixture_data = json.loads(decoded_props)
-            fixtures.append(fixture_data)
-            logger.debug(f"Parsed fixture: {fixture_data.get('title', 'Unknown')}")
+            fixture_dict = json.loads(decoded_props)
+            fixture = FixtureData.model_validate(fixture_dict)
+            fixtures.append(fixture)
+            logger.debug(f"Parsed fixture: {fixture.title}")
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON from data-props: {e}")
             logger.debug(f"Raw data: {decoded_props[:200]}...")
@@ -78,17 +81,18 @@ def extract_fixtures(html_content: str) -> list[dict[str, Any]]:
     return fixtures
 
 
-def scrape_fixtures() -> list[dict[str, Any]]:
+def scrape_fixtures() -> list[FixtureData]:
     """Scrape fixture ticketing data from Brentford FC website.
 
     Convenience function that fetches and parses the ticketing page.
 
     Returns:
-        List of fixture data dictionaries
+        List of FixtureData objects
 
     Raises:
         requests.RequestException: If fetching fails
         json.JSONDecodeError: If parsing fails
+        pydantic.ValidationError: If data doesn't match schema
     """
     html_content = fetch_page()
     return extract_fixtures(html_content)
