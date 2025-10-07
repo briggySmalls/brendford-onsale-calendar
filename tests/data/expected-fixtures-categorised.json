@@ -1,0 +1,275 @@
+[
+  {
+    "generalFixtureData": {
+      "title": "West Ham (A)",
+      "oppositionName": "West Ham United",
+      "oppositionBadge": "https://clublogos.stadion.io/assets/ClubLogos/Football/English/735.png",
+      "isHomeFixture": false,
+      "fixtureDate": "2025-10-20T20:00:00",
+      "competition": "Premier League",
+      "category": "Category A",
+      "buyNowLink": {
+        "title": "BUY NOW",
+        "url": "https://www.eticketing.co.uk/brentfordfc/events?prefilter=5&prefiltername=away%20games?utm_source=website&utm_medium=webpage&utm_campaign=fixture2526_rri_west_ham_a&utm_content=",
+        "isExternal": true,
+        "isActive": false,
+        "id": "7c0b4c83-ae61-4c1f-93ac-3fdb266e72cf",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      },
+      "findOutMoreLink": {
+        "title": "FIND OUT MORE",
+        "url": "/en/west-ham-v-brentford-25-26",
+        "isExternal": false,
+        "isActive": false,
+        "id": "880716fe-0b7b-40ab-9359-4e29415ab7ee",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      }
+    },
+    "categories": [
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 1760,
+        "onSaleDate": "2025-09-10T13:00:00Z",
+        "eventId": "MZ26639176"
+      },
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 1350,
+        "onSaleDate": "2025-09-11T13:00:00Z",
+        "eventId": "OC26639280"
+      },
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 0,
+        "onSaleDate": "2025-09-17T13:00:00Z",
+        "eventId": "sI26639290"
+      },
+      {
+        "membershipType": "My Bees Members",
+        "minimumTaps": 0,
+        "onSaleDate": "2025-09-18T14:00:00Z",
+        "eventId": "ru26639327"
+      }
+    ]
+  },
+  {
+    "generalFixtureData": {
+      "title": "Liverpool (H)",
+      "oppositionName": "Liverpool",
+      "oppositionBadge": "https://clublogos.stadion.io/assets/ClubLogos/Football/English/676.png",
+      "isHomeFixture": true,
+      "fixtureDate": "2025-10-25T20:00:00",
+      "competition": "Premier League",
+      "category": "Category A*",
+      "buyNowLink": {
+        "title": "BUY NOW",
+        "url": "https://www.eticketing.co.uk/brentfordfc/events?prefilter=4&prefiltername=home%20games?utm_source=website&utm_medium=webpage&utm_campaign=fixture2526_rri_liverpool_h&utm_content=",
+        "isExternal": true,
+        "isActive": false,
+        "id": "b8486dfd-cdcc-4ea0-bb2f-31158c7abe38",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      },
+      "findOutMoreLink": {
+        "title": "FIND OUT MORE",
+        "url": "/en/brentford-v-liverpool-25-26",
+        "isExternal": false,
+        "isActive": false,
+        "id": "3706ebe8-5aea-4a22-bce8-fde25c28f8c3",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      }
+    },
+    "categories": [
+      {
+        "membershipType": "My Bees Members",
+        "minimumTaps": 500,
+        "onSaleDate": "2025-09-19T13:00:00Z",
+        "eventId": "UP26698716"
+      },
+      {
+        "membershipType": "My Bees Members",
+        "minimumTaps": 300,
+        "onSaleDate": "2025-09-22T13:00:00Z",
+        "eventId": "iy26698734"
+      },
+      {
+        "membershipType": "My Bees Members",
+        "minimumTaps": 100,
+        "onSaleDate": "2025-09-23T13:00:00Z",
+        "eventId": "dI26698789"
+      }
+    ]
+  },
+  {
+    "generalFixtureData": {
+      "title": "Grimsby Town (A)",
+      "oppositionName": "Grimsby Town",
+      "oppositionBadge": "https://res.cloudinary.com/brentford-fc/image/upload/v1759512799/Grimsby_Town_F.C._logo.svg_pqmks6.png",
+      "isHomeFixture": false,
+      "fixtureDate": "2025-10-28T19:45:00",
+      "competition": "Carabao Cup",
+      "category": "Category A",
+      "buyNowLink": {
+        "title": "BUY NOW",
+        "url": "https://www.eticketing.co.uk/brentfordfc/events?prefilter=5&prefiltername=away%20games?utm_source=website&utm_medium=promo_module&utm_campaign=fixture2526_rri_grimsby_town_a&utm_content",
+        "isExternal": true,
+        "isActive": false,
+        "id": "40a26345-ac63-4885-a205-770593b0bf9c",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      },
+      "findOutMoreLink": {
+        "title": "FIND OUT MORE",
+        "url": "/en/grimsby-town-v-brentford-25-26-carabao-cup",
+        "isExternal": false,
+        "isActive": false,
+        "id": "8ce02d0a-0954-4a1b-bf56-20fbd7518301",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      }
+    },
+    "categories": [
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 2250,
+        "onSaleDate": "2025-10-06T14:00:00Z",
+        "eventId": "Ss26891582"
+      },
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 1800,
+        "onSaleDate": "2025-10-07T13:00:00Z",
+        "eventId": "PO26891625"
+      },
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 1350,
+        "onSaleDate": "2025-10-08T13:00:00Z",
+        "eventId": "Uu26891631"
+      },
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 0,
+        "onSaleDate": "2025-10-09T13:00:00Z",
+        "eventId": "vF26891634"
+      }
+    ]
+  },
+  {
+    "generalFixtureData": {
+      "title": "Crystal Palace (A)",
+      "oppositionName": "Crystal Palace",
+      "oppositionBadge": "https://clublogos.stadion.io/assets/ClubLogos/Football/English/642.png",
+      "isHomeFixture": false,
+      "fixtureDate": "2025-11-01T15:00:00",
+      "competition": "Premier League",
+      "category": "Category A",
+      "buyNowLink": {
+        "title": "BUY NOW",
+        "url": "https://www.eticketing.co.uk/brentfordfc/events?prefilter=5&prefiltername=away%20games?utm_source=website&utm_medium=promo_module&utm_campaign=fixture2526_rri_crystal_palace_a&utm_content=",
+        "isExternal": true,
+        "isActive": false,
+        "id": "b5991fa1-d597-4e51-ae05-1a3167c80b56",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      },
+      "findOutMoreLink": {
+        "title": "FIND OUT MORE",
+        "url": "/en/crystal-palace-v-brentford-25-26",
+        "isExternal": false,
+        "isActive": false,
+        "id": "1b5fe064-016e-4057-916c-e62242ba9f53",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      }
+    },
+    "categories": [
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 1750,
+        "onSaleDate": "2025-09-24T13:00:00Z",
+        "eventId": "tK26759829"
+      },
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 1300,
+        "onSaleDate": "2025-09-25T13:00:00Z",
+        "eventId": "hd26759801"
+      },
+      {
+        "membershipType": "Season Ticket and Premium Seat Holders",
+        "minimumTaps": 0,
+        "onSaleDate": "2025-09-29T13:00:00Z",
+        "eventId": "Rv26759795"
+      },
+      {
+        "membershipType": "Members",
+        "minimumTaps": 0,
+        "onSaleDate": "2025-09-30T13:00:00Z",
+        "eventId": "Ll26759826"
+      }
+    ]
+  },
+  {
+    "generalFixtureData": {
+      "title": "Newcastle United (H)",
+      "oppositionName": "Newcastle United",
+      "oppositionBadge": "https://clublogos.stadion.io/assets/ClubLogos/Football/English/688.png",
+      "isHomeFixture": true,
+      "fixtureDate": "2025-11-09T14:00:00",
+      "competition": "Premier League",
+      "category": "Category A",
+      "buyNowLink": {
+        "title": "BUY NOW",
+        "url": "https://www.eticketing.co.uk/brentfordfc/events?prefilter=4&prefiltername=home%20games?utm_source=website&utm_medium=promo_module&utm_campaign=fixture2526_rri_newcastle_united_h&utm_content=",
+        "isExternal": true,
+        "isActive": false,
+        "id": "7161dba2-39dd-4b61-b5d7-5a05ae228ce5",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      },
+      "findOutMoreLink": {
+        "title": "FIND OUT MORE",
+        "url": "/en/brentford-v-newcastle-united-25-26",
+        "isExternal": false,
+        "isActive": false,
+        "id": "d79538db-6a7e-4a52-aaef-38884770f22a",
+        "type": "Standard",
+        "membershipOnly": false,
+        "seasonTicketOnly": false
+      }
+    },
+    "categories": [
+      {
+        "membershipType": "My Bees Members",
+        "minimumTaps": 500,
+        "onSaleDate": "2025-10-02T13:00:00Z",
+        "eventId": "mf26831584"
+      },
+      {
+        "membershipType": "My Bees Members",
+        "minimumTaps": 300,
+        "onSaleDate": "2025-10-03T13:00:00Z",
+        "eventId": "dG26831675"
+      },
+      {
+        "membershipType": "My Bees Members",
+        "minimumTaps": 40,
+        "onSaleDate": "2025-10-06T13:00:00Z",
+        "eventId": "kC26831687"
+      }
+    ]
+  }
+]
