@@ -1,9 +1,12 @@
 """CLI for Brentford Calendar sync."""
 
+import json
 import logging
 import sys
 
 import click
+
+from brentford_calendar.scraper import scrape_fixtures
 
 
 def setup_logging(verbose: int) -> None:
@@ -33,9 +36,18 @@ def main(verbose: int) -> None:
     setup_logging(verbose)
     logger = logging.getLogger(__name__)
 
-    logger.info("Sync started")
-    click.echo("Brentford Calendar Sync - Coming soon!")
-    logger.info("Sync completed")
+    try:
+        logger.info("Fetching fixtures from Brentford FC website")
+        fixtures = scrape_fixtures()
+        logger.info(f"Found {len(fixtures)} fixtures")
+
+        # Output as formatted JSON
+        click.echo(json.dumps(fixtures, indent=2))
+
+    except Exception as e:
+        logger.error(f"Failed to scrape fixtures: {e}", exc_info=verbose >= 2)
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
