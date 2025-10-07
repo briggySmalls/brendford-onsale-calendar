@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Configure git for pre-commit
+        run: git config --global --add safe.directory $PWD
+
+      - name: Run checks
+        run: make check
+
+      - name: Run tests
+        run: make test

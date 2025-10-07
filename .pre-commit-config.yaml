@@ -1,0 +1,35 @@
+# All hooks run via 'uv run' to ensure consistent tooling and enable
+# performant CI caching (GitHub Actions can cache the single uv environment)
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff-check
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: mypy
+        name: mypy
+        entry: uv run mypy src/
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^tests/data/
+      - id: end-of-file-fixer
+        exclude: ^tests/data/
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
