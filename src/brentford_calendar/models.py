@@ -53,3 +53,14 @@ class FixtureData(BaseModel):
     category4_event_id: str
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class CalendarEventData(BaseModel):
+    """Data for creating/updating a Google Calendar event."""
+
+    summary: str
+    description: str
+    start: datetime
+    end: datetime
+    source_id: str
+    url: str | None = None
