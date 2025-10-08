@@ -59,6 +59,29 @@ brentford-calendar \
 - `--calendar-id`: Your Google Calendar ID
 - `-v` / `-vv`: Increase verbosity for debugging
 
+## Automated Sync with GitHub Actions
+
+You can set up automated daily syncing using GitHub Actions. The workflow runs daily at 6am UTC (6am GMT in winter / 7am BST in summer) and can also be triggered manually.
+
+### Setup
+
+1. **Create GitHub Secrets** (Settings → Secrets and variables → Actions → Secrets):
+   - `GOOGLE_CREDENTIALS_JSON`: Paste the entire contents of your service account JSON file
+   - `GOOGLE_CALENDAR_ID`: Your calendar ID (e.g., `abc123@group.calendar.google.com`)
+
+2. **Create Repository Variables** (Settings → Secrets and variables → Actions → Variables tab):
+   - `MEMBERSHIP_TYPE`: Your membership type (e.g., `MY_BEES_MEMBERS`)
+   - `TAPS_COUNT`: Your TAPs count (e.g., `800`)
+
+### Manual Trigger
+
+To manually trigger a sync:
+1. Go to the **Actions** tab in your GitHub repository
+2. Select **Sync to Google Calendar** workflow
+3. Click **Run workflow** → **Run workflow**
+
+The workflow will show the sync output, including the number of events created or updated. If the sync fails, GitHub will send you an email notification.
+
 ## Development Setup
 
 ### Prerequisites

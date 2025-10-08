@@ -1,0 +1,44 @@
+name: Sync to Google Calendar
+
+on:
+  schedule:
+    # Run daily at 6am UTC (6am GMT winter / 7am BST summer)
+    - cron: '0 6 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Create credentials file
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > /tmp/credentials.json
+
+      - name: Sync to calendar
+        run: |
+          uv run brentford-calendar \
+            --membership ${{ vars.MEMBERSHIP_TYPE }} \
+            --taps ${{ vars.TAPS_COUNT }} \
+            --credentials /tmp/credentials.json \
+            --calendar-id ${{ secrets.GOOGLE_CALENDAR_ID }}
+
+      - name: Cleanup credentials
+        if: always()
+        run: rm -f /tmp/credentials.json
