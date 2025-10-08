@@ -21,6 +21,25 @@ class MembershipType(str, Enum):
     MY_BEES_MEMBERS = "My Bees Members"
     MEMBERS = "Members"
 
+    def can_purchase(self, category_type: "MembershipType") -> bool:
+        """Check if this membership tier can purchase tickets from a category.
+
+        Higher tiers can purchase from equal or lower tier categories.
+        Hierarchy: SEASON_TICKET > MY_BEES_MEMBERS > MEMBERS
+
+        Args:
+            category_type: The membership type required for the category
+
+        Returns:
+            True if this membership can purchase from that category
+        """
+        hierarchy = {
+            MembershipType.SEASON_TICKET: 3,
+            MembershipType.MY_BEES_MEMBERS: 2,
+            MembershipType.MEMBERS: 1,
+        }
+        return hierarchy[self] >= hierarchy[category_type]
+
 
 class Link(CamelCaseAliasBaseModel):
     """A link/button with metadata."""
@@ -211,4 +230,50 @@ class ProcessedFixtureData(CamelCaseAliasBaseModel):
         return ProcessedFixtureData(
             general_fixture_data=general_fixture_data,
             categories=categories,
+        )
+
+
+class OnsaleFixtureData(CamelCaseAliasBaseModel):
+    """Fixture with single matching on-sale category for user's membership."""
+
+    general_fixture_data: GeneralFixtureData
+    onsale: CategoryWindow | None
+
+    @staticmethod
+    def from_processed_fixture_data(
+        processed: ProcessedFixtureData,
+        membership: MembershipType,
+        taps: int,
+    ) -> "OnsaleFixtureData | None":
+        """Convert ProcessedFixtureData to OnsaleFixtureData for user's membership.
+
+        Finds the first eligible category (chronologically by on-sale date) where:
+        - User's membership tier can purchase the category
+        - User has sufficient TAPs
+
+        Args:
+            processed: Processed fixture data with all categories
+            membership: User's membership type
+            taps: User's TAP count
+
+        Returns:
+            OnsaleFixtureData if any eligible categories exist, None otherwise
+        """
+        # Filter categories by membership eligibility and TAPs requirement
+        eligible_categories = [
+            cat
+            for cat in processed.categories
+            if membership.can_purchase(cat.membership_type) and taps >= cat.minimum_taps
+        ]
+
+        # No eligible categories means this fixture is not available
+        if not eligible_categories:
+            return None
+
+        # Sort by on_sale_date to find earliest eligible category
+        eligible_categories.sort(key=lambda cat: cat.on_sale_date)
+
+        return OnsaleFixtureData(
+            general_fixture_data=processed.general_fixture_data,
+            onsale=eligible_categories[0],
         )
