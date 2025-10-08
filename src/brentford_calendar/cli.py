@@ -1,11 +1,13 @@
 """CLI for Brentford Calendar sync."""
 
-import json
 import logging
 import sys
+from pathlib import Path
 
 import click
 
+from brentford_calendar.calendar_client import CalendarClient
+from brentford_calendar.config import load_config_from_file
 from brentford_calendar.models import (
     MembershipType,
     OnsaleFixtureData,
@@ -51,7 +53,25 @@ def setup_logging(verbose: int) -> None:
     default=0,
     help="Number of TAPs you have (default: 0)",
 )
-def main(verbose: int, membership: str, taps: int) -> None:
+@click.option(
+    "--credentials",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to Google service account JSON file",
+)
+@click.option(
+    "--calendar-id",
+    type=str,
+    required=True,
+    help="Google Calendar ID",
+)
+def main(
+    verbose: int,
+    membership: str,
+    taps: int,
+    credentials: Path,
+    calendar_id: str,
+) -> None:
     """Sync Brentford FC ticket on-sale dates to Google Calendar."""
     setup_logging(verbose)
     logger = logging.getLogger(__name__)
@@ -79,9 +99,24 @@ def main(verbose: int, membership: str, taps: int) -> None:
             f"Found {len(onsale_fixtures)} fixtures with eligible on-sale dates"
         )
 
-        # Convert Pydantic models to dicts and output as formatted JSON
-        fixtures_dict = [f.model_dump(by_alias=True) for f in onsale_fixtures]
-        click.echo(json.dumps(fixtures_dict, indent=2, default=str))
+        # Sync to Google Calendar
+        logger.info("Syncing to Google Calendar")
+        config = load_config_from_file(credentials, calendar_id)
+        client = CalendarClient.from_config(config)
+
+        # Sync each onsale fixture
+        created, updated = 0, 0
+        for onsale_fixture in onsale_fixtures:
+            event_data = onsale_fixture.to_calendar_event_data()
+            was_created = client.upsert_event(event_data)
+            if was_created:
+                created += 1
+            else:
+                updated += 1
+
+        msg = f"Synced {len(onsale_fixtures)} events "
+        msg += f"({created} created, {updated} updated)"
+        click.echo(msg)
 
     except Exception as e:
         logger.error(f"Failed to process fixtures: {e}", exc_info=verbose >= 2)

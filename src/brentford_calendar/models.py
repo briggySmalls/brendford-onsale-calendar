@@ -277,3 +277,65 @@ class OnsaleFixtureData(CamelCaseAliasBaseModel):
             general_fixture_data=processed.general_fixture_data,
             onsale=eligible_categories[0],
         )
+
+    def to_calendar_event_data(self) -> CalendarEventData:
+        """Convert to Google Calendar event data.
+
+        Returns:
+            CalendarEventData for creating/updating calendar events
+
+        Raises:
+            ValueError: If onsale category is None
+        """
+        if self.onsale is None:
+            msg = "Cannot create calendar event for fixture with no onsale category"
+            raise ValueError(msg)
+
+        # Determine fixture location (H/A)
+        fixture_location = "H" if self.general_fixture_data.is_home_fixture else "A"
+
+        # Build summary: "West Ham (A) - Tickets On Sale"
+        opposition = self.general_fixture_data.opposition_name
+        summary = f"{opposition} ({fixture_location}) - Tickets On Sale"
+
+        # Build description with fixture details
+        fixture_date_str = self.general_fixture_data.fixture_date.strftime(
+            "%Y-%m-%d %H:%M"
+        )
+        # Build match teams string
+        if self.general_fixture_data.is_home_fixture:
+            match_str = f"Match: Brentford vs {opposition}"
+        else:
+            match_str = f"Match: {opposition} vs Brentford"
+
+        description_lines = [
+            match_str,
+            f"Date: {fixture_date_str}",
+            f"Competition: {self.general_fixture_data.competition}",
+            "",
+            f"Membership: {self.onsale.membership_type.value}",
+            f"Minimum TAPs: {self.onsale.minimum_taps}",
+        ]
+
+        if self.general_fixture_data.buy_now_link.url:
+            description_lines.append("")
+            description_lines.append(
+                f"Buy tickets: {self.general_fixture_data.buy_now_link.url}"
+            )
+
+        description = "\n".join(description_lines)
+
+        # Use onsale date as event start time
+        from datetime import timedelta
+
+        start_time = self.onsale.on_sale_date
+        end_time = start_time + timedelta(hours=1)
+
+        return CalendarEventData(
+            summary=summary,
+            description=description,
+            start=start_time,
+            end=end_time,
+            source_id=self.onsale.event_id,
+            url=self.general_fixture_data.buy_now_link.url,
+        )
