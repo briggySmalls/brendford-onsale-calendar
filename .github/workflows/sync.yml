@@ -37,7 +37,8 @@ jobs:
             --membership ${{ vars.MEMBERSHIP_TYPE }} \
             --taps ${{ vars.TAPS_COUNT }} \
             --credentials /tmp/credentials.json \
-            --calendar-id ${{ secrets.GOOGLE_CALENDAR_ID }}
+            --calendar-id ${{ secrets.GOOGLE_CALENDAR_ID }} \
+            -v
 
       - name: Cleanup credentials
         if: always()
