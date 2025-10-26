@@ -153,7 +153,8 @@ class ProcessedFixtureData(CamelCaseAliasBaseModel):
             membership_type = MembershipType.MY_BEES_MEMBERS
         elif "season ticket" in label_lower:
             membership_type = MembershipType.SEASON_TICKET
-        elif "all members" in label_lower:
+        elif "members" in label_lower:
+            # Catches both "All Members" and "Members with X+ TAPs"
             membership_type = MembershipType.MEMBERS
         else:
             msg = f"Unknown membership type in label: {label}"
