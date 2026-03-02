@@ -1,9 +1,16 @@
 """Tests for ProcessedFixtureData model and category parsing."""
 
 import json
+import logging
 from pathlib import Path
 
-from brentford_calendar.models import FixtureData, ProcessedFixtureData
+import pytest
+
+from brentford_calendar.models import (
+    FixtureData,
+    MembershipType,
+    ProcessedFixtureData,
+)
 
 
 def test_from_fixture_data_matches_expected() -> None:
@@ -27,3 +34,35 @@ def test_from_fixture_data_matches_expected() -> None:
         expected = ProcessedFixtureData.model_validate(expected_json)
 
         assert processed == expected
+
+
+class TestParseCategoryLabel:
+    """Tests for _parse_category_label static method."""
+
+    def test_all_season_ticket_holders_and_members(self) -> None:
+        label = "All season ticket holders and members (purchase 6 tickets per account)"
+        membership, taps = ProcessedFixtureData._parse_category_label(label)
+        assert membership == MembershipType.MEMBERS
+        assert taps == 0
+
+    def test_previous_purchasers(self) -> None:
+        label = "All previous purchasers (purchase 6 tickets per account)"
+        membership, taps = ProcessedFixtureData._parse_category_label(label)
+        assert membership == MembershipType.MEMBERS
+        assert taps == 0
+
+    def test_unrecognised_label_defaults_to_members(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        label = "Some completely unknown label"
+        with caplog.at_level(logging.WARNING):
+            membership, taps = ProcessedFixtureData._parse_category_label(label)
+        assert membership == MembershipType.MEMBERS
+        assert taps == 0
+        assert "Unrecognised category label" in caplog.text
+
+    def test_my_bees_members_with_taps(self) -> None:
+        label = "My Bees members with 500+ TAPs"
+        membership, taps = ProcessedFixtureData._parse_category_label(label)
+        assert membership == MembershipType.MY_BEES_MEMBERS
+        assert taps == 500

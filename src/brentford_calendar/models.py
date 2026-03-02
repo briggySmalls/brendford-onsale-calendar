@@ -1,11 +1,14 @@
 """Data models for Brentford FC fixture ticketing."""
 
+import logging
 import re
 from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+
+logger = logging.getLogger(__name__)
 
 
 class CamelCaseAliasBaseModel(BaseModel):
@@ -151,14 +154,17 @@ class ProcessedFixtureData(CamelCaseAliasBaseModel):
 
         if "my bees" in label_lower:
             membership_type = MembershipType.MY_BEES_MEMBERS
+        elif "members" in label_lower:
+            membership_type = MembershipType.MEMBERS
         elif "season ticket" in label_lower:
             membership_type = MembershipType.SEASON_TICKET
-        elif "members" in label_lower:
-            # Catches both "All Members" and "Members with X+ TAPs"
+        elif "previous purchaser" in label_lower:
             membership_type = MembershipType.MEMBERS
         else:
-            msg = f"Unknown membership type in label: {label}"
-            raise ValueError(msg)
+            logger.warning(
+                "Unrecognised category label %r, defaulting to MEMBERS", label
+            )
+            membership_type = MembershipType.MEMBERS
 
         return membership_type, minimum_taps
 
