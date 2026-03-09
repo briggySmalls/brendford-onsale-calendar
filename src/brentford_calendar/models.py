@@ -67,7 +67,7 @@ class FixtureData(CamelCaseAliasBaseModel):
     fixture_date: datetime
     competition: str
     category: str
-    buy_now_link: Link
+    buy_now_link: Link | None = None
     find_out_more_link: Link
     sale_status: str
 
@@ -119,7 +119,7 @@ class GeneralFixtureData(CamelCaseAliasBaseModel):
     fixture_date: datetime
     competition: str
     category: str
-    buy_now_link: Link
+    buy_now_link: Link | None
     find_out_more_link: Link
 
 
@@ -324,7 +324,7 @@ class OnsaleFixtureData(CamelCaseAliasBaseModel):
             f"Minimum TAPs: {self.onsale.minimum_taps}",
         ]
 
-        if self.general_fixture_data.buy_now_link.url:
+        if self.general_fixture_data.buy_now_link is not None:
             description_lines.append("")
             description_lines.append(
                 f"Buy tickets: {self.general_fixture_data.buy_now_link.url}"
@@ -344,5 +344,7 @@ class OnsaleFixtureData(CamelCaseAliasBaseModel):
             start=start_time,
             end=end_time,
             source_id=self.onsale.event_id,
-            url=self.general_fixture_data.buy_now_link.url,
+            url=self.general_fixture_data.buy_now_link.url
+            if self.general_fixture_data.buy_now_link
+            else None,
         )
