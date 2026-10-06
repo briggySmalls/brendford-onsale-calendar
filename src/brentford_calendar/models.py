@@ -44,17 +44,12 @@ class MembershipType(str, Enum):
         return hierarchy[self] >= hierarchy[category_type]
 
 
-class Link(CamelCaseAliasBaseModel):
-    """A link/button with metadata."""
+class SaleWindow(CamelCaseAliasBaseModel):
+    """A raw on-sale window for a fixture, as listed on the website."""
 
-    title: str
-    url: str
-    is_external: bool
-    is_active: bool
-    id: str
-    type: str
-    membership_only: bool
-    season_ticket_only: bool
+    label: str
+    on_sale_date: datetime
+    event_id: str
 
 
 class FixtureData(CamelCaseAliasBaseModel):
@@ -67,26 +62,10 @@ class FixtureData(CamelCaseAliasBaseModel):
     fixture_date: datetime
     competition: str
     category: str
-    buy_now_link: Link | None = None
-    find_out_more_link: Link
-    sale_status: str
+    buy_now_url: str | None = None
+    find_out_more_url: str
 
-    # Sale windows (category 1-4)
-    category1_label: str
-    category1_on_sale_date: datetime
-    category1_event_id: str
-
-    category2_label: str
-    category2_on_sale_date: datetime
-    category2_event_id: str
-
-    category3_label: str
-    category3_on_sale_date: datetime
-    category3_event_id: str
-
-    category4_label: str
-    category4_on_sale_date: datetime
-    category4_event_id: str
+    windows: list[SaleWindow]
 
 
 class CalendarEventData(BaseModel):
@@ -119,8 +98,8 @@ class GeneralFixtureData(CamelCaseAliasBaseModel):
     fixture_date: datetime
     competition: str
     category: str
-    buy_now_link: Link | None
-    find_out_more_link: Link
+    buy_now_url: str | None
+    find_out_more_url: str
 
 
 class ProcessedFixtureData(CamelCaseAliasBaseModel):
@@ -180,45 +159,17 @@ class ProcessedFixtureData(CamelCaseAliasBaseModel):
         """
         categories = []
 
-        # Process each of the 4 category slots
-        category_slots = [
-            (
-                fixture.category1_label,
-                fixture.category1_on_sale_date,
-                fixture.category1_event_id,
-            ),
-            (
-                fixture.category2_label,
-                fixture.category2_on_sale_date,
-                fixture.category2_event_id,
-            ),
-            (
-                fixture.category3_label,
-                fixture.category3_on_sale_date,
-                fixture.category3_event_id,
-            ),
-            (
-                fixture.category4_label,
-                fixture.category4_on_sale_date,
-                fixture.category4_event_id,
-            ),
-        ]
-
-        for label, on_sale_date, event_id in category_slots:
-            # Skip empty categories
-            if not label or not event_id:
-                continue
-
+        for window in fixture.windows:
             membership_type, minimum_taps = ProcessedFixtureData._parse_category_label(
-                label
+                window.label
             )
 
             categories.append(
                 CategoryWindow(
                     membership_type=membership_type,
                     minimum_taps=minimum_taps,
-                    on_sale_date=on_sale_date,
-                    event_id=event_id,
+                    on_sale_date=window.on_sale_date,
+                    event_id=window.event_id,
                 )
             )
 
@@ -230,8 +181,8 @@ class ProcessedFixtureData(CamelCaseAliasBaseModel):
             fixture_date=fixture.fixture_date,
             competition=fixture.competition,
             category=fixture.category,
-            buy_now_link=fixture.buy_now_link,
-            find_out_more_link=fixture.find_out_more_link,
+            buy_now_url=fixture.buy_now_url,
+            find_out_more_url=fixture.find_out_more_url,
         )
 
         return ProcessedFixtureData(
@@ -324,10 +275,10 @@ class OnsaleFixtureData(CamelCaseAliasBaseModel):
             f"Minimum TAPs: {self.onsale.minimum_taps}",
         ]
 
-        if self.general_fixture_data.buy_now_link is not None:
+        if self.general_fixture_data.buy_now_url is not None:
             description_lines.append("")
             description_lines.append(
-                f"Buy tickets: {self.general_fixture_data.buy_now_link.url}"
+                f"Buy tickets: {self.general_fixture_data.buy_now_url}"
             )
 
         description = "\n".join(description_lines)
@@ -344,7 +295,5 @@ class OnsaleFixtureData(CamelCaseAliasBaseModel):
             start=start_time,
             end=end_time,
             source_id=self.onsale.event_id,
-            url=self.general_fixture_data.buy_now_link.url
-            if self.general_fixture_data.buy_now_link
-            else None,
+            url=self.general_fixture_data.buy_now_url,
         )

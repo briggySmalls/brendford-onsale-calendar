@@ -1,11 +1,24 @@
 """Tests for CLI."""
 
+from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
 from click.testing import CliRunner
 
 from brentford_calendar.cli import main
+from brentford_calendar.scraper import extract_fixtures
+
+FIXTURE_HTML_PATH = Path(__file__).parent / "data" / "ticket-information.html"
+
+
+@pytest.fixture(autouse=True)
+def scraped_fixtures() -> Iterator[None]:
+    """Serve fixtures from the saved HTML instead of the live website."""
+    fixtures = extract_fixtures(FIXTURE_HTML_PATH.read_text())
+    with patch("brentford_calendar.cli.scrape_fixtures", return_value=fixtures):
+        yield
 
 
 def test_cli_verbose_flag() -> None:
@@ -104,3 +117,31 @@ def test_cli_calendar_sync() -> None:
             # Check output message contains expected format
             assert "Synced" in result.output
             assert "events" in result.output
+
+
+def test_cli_fails_when_no_fixtures_found() -> None:
+    """Test that the CLI exits non-zero when the scraper finds no fixtures."""
+    runner = CliRunner()
+
+    with runner.isolated_filesystem():
+        creds_path = Path("service-account.json")
+        creds_path.write_text('{"type": "service_account"}')
+
+        with patch(
+            "brentford_calendar.cli.scrape_fixtures",
+            side_effect=ValueError("No fixtures found"),
+        ):
+            result = runner.invoke(
+                main,
+                [
+                    "--membership",
+                    "MY_BEES_MEMBERS",
+                    "--credentials",
+                    str(creds_path),
+                    "--calendar-id",
+                    "test@group.calendar.google.com",
+                ],
+            )
+
+    assert result.exit_code == 1
+    assert "No fixtures found" in result.output

@@ -45,6 +45,31 @@ class TestParseCategoryLabel:
         assert membership == MembershipType.MEMBERS
         assert taps == 0
 
+    def test_season_ticket_holders_and_members_with_ampersand(self) -> None:
+        label = (
+            "All season ticket holders & members (purchase four tickets per account)"
+        )
+        membership, taps = ProcessedFixtureData._parse_category_label(label)
+        assert membership == MembershipType.MEMBERS
+        assert taps == 0
+
+    def test_season_ticket_premium_seat_holders(self) -> None:
+        label = "All season ticket/premium seat holders"
+        membership, taps = ProcessedFixtureData._parse_category_label(label)
+        assert membership == MembershipType.SEASON_TICKET
+        assert taps == 0
+
+    def test_all_members(self) -> None:
+        membership, taps = ProcessedFixtureData._parse_category_label("All members")
+        assert membership == MembershipType.MEMBERS
+        assert taps == 0
+
+    def test_all_my_bees_members_without_taps(self) -> None:
+        label = "All My Bees members"
+        membership, taps = ProcessedFixtureData._parse_category_label(label)
+        assert membership == MembershipType.MY_BEES_MEMBERS
+        assert taps == 0
+
     def test_previous_purchasers(self) -> None:
         label = "All previous purchasers (purchase 6 tickets per account)"
         membership, taps = ProcessedFixtureData._parse_category_label(label)

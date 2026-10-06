@@ -1,17 +1,24 @@
 """Web scraper for Brentford FC ticket information."""
 
-import html
-import json
 import logging
+from datetime import datetime
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
-from brentford_calendar.models import FixtureData
+from brentford_calendar.dates import parse_fixture_datetime, parse_window_datetime
+from brentford_calendar.models import FixtureData, SaleWindow
 
 logger = logging.getLogger(__name__)
 
 TICKETING_URL = "https://www.brentfordfc.com/en/ticket-information"
+
+CARD_TEST_ID = "fixture-ticketing-card"
+ROWS_TEST_ID = "fixture-ticketing-card__rows"
+SALE_CTA_TEST_ID = "fixture-ticketing-card__sale-cta"
+FIND_OUT_MORE_TEST_ID = "fixture-ticketing-card__find-out-more"
 
 
 def fetch_page(url: str = TICKETING_URL, timeout: int = 30) -> str:
@@ -34,11 +41,79 @@ def fetch_page(url: str = TICKETING_URL, timeout: int = 30) -> str:
     return response.text
 
 
+def _parse_windows(card: Tag, fixture_date: datetime) -> list[SaleWindow]:
+    """Parse the on-sale rows of a fixture card.
+
+    Each row is a label and an on-sale date, with a link to an AddEvent
+    reminder whose trailing path segment identifies the window.
+    """
+    rows = card.select_one(f'[data-testid="{ROWS_TEST_ID}"]')
+    if rows is None:
+        return []
+
+    windows = []
+    for row in rows.find_all("li"):
+        texts = [p.get_text(strip=True) for p in row.find_all("p")]
+        link = row.select_one("a[href]")
+        if len(texts) != 2 or link is None:
+            logger.warning(f"Skipping unrecognised on-sale row: {texts}")
+            continue
+
+        label, on_sale_text = texts
+        windows.append(
+            SaleWindow(
+                label=label,
+                on_sale_date=parse_window_datetime(on_sale_text, fixture_date),
+                event_id=str(link["href"]).rstrip("/").rsplit("/", 1)[-1],
+            )
+        )
+    return windows
+
+
+def _parse_card(card: Tag) -> FixtureData:
+    """Parse a single fixture-ticketing card."""
+    opposition = card.select_one("h3")
+    badge = card.select_one("img")
+    find_out_more = card.select_one(f'[data-testid="{FIND_OUT_MORE_TEST_ID}"]')
+    if opposition is None or badge is None or find_out_more is None:
+        msg = "Fixture card is missing its opposition, badge or find out more link"
+        raise ValueError(msg)
+
+    # Class names are generated, so the fixture details are read by position:
+    # home/away, date, competition, kick-off, category.
+    details = [
+        p.get_text(strip=True) for p in card.find_all("p") if not p.find_parent("ul")
+    ]
+    if len(details) != 5 or details[0] not in ("Home", "Away"):
+        msg = f"Unrecognised fixture card details: {details}"
+        raise ValueError(msg)
+    location, date_text, competition, time_text, category = details
+
+    is_home_fixture = location == "Home"
+    fixture_date = parse_fixture_datetime(date_text, time_text)
+    opposition_name = opposition.get_text(strip=True)
+
+    sale_cta = card.select_one(f'a[data-testid="{SALE_CTA_TEST_ID}"][href]')
+
+    return FixtureData(
+        title=f"{opposition_name} ({'H' if is_home_fixture else 'A'})",
+        opposition_name=opposition_name,
+        opposition_badge=str(badge["src"]),
+        is_home_fixture=is_home_fixture,
+        fixture_date=fixture_date,
+        competition=competition,
+        category=category,
+        buy_now_url=str(sale_cta["href"]) if sale_cta else None,
+        find_out_more_url=urljoin(TICKETING_URL, str(find_out_more["href"])),
+        windows=_parse_windows(card, fixture_date),
+    )
+
+
 def extract_fixtures(html_content: str) -> list[FixtureData]:
     """Extract fixture ticketing data from HTML.
 
-    Parses HTML to find all divs with data-component="FixtureTicketingModule",
-    decodes the HTML entities in data-props, and parses the JSON data.
+    Parses HTML to find every fixture-ticketing card and reads the fixture
+    details and on-sale windows from its text.
 
     Args:
         html_content: Raw HTML content
@@ -47,35 +122,19 @@ def extract_fixtures(html_content: str) -> list[FixtureData]:
         List of FixtureData objects
 
     Raises:
-        json.JSONDecodeError: If JSON parsing fails for any fixture
-        pydantic.ValidationError: If fixture data doesn't match schema
+        ValueError: If a card or one of its dates can't be understood
     """
     logger.info("Parsing HTML for fixture data")
     soup = BeautifulSoup(html_content, "html5lib")
 
-    # Find all FixtureTicketingModule divs
-    fixture_divs = soup.find_all("div", {"data-component": "FixtureTicketingModule"})
-    logger.info(f"Found {len(fixture_divs)} fixture modules")
+    cards = soup.find_all("section", attrs={"data-testid": CARD_TEST_ID})
+    logger.info(f"Found {len(cards)} fixture cards")
 
     fixtures = []
-    for div in fixture_divs:
-        raw_props = div.get("data-props", "")
-        if not raw_props:
-            logger.warning("Found div without data-props, skipping")
-            continue
-
-        # Decode HTML entities (&quot; -> ")
-        decoded_props = html.unescape(raw_props)
-
-        try:
-            fixture_dict = json.loads(decoded_props)
-            fixture = FixtureData.model_validate(fixture_dict)
-            fixtures.append(fixture)
-            logger.debug(f"Parsed fixture: {fixture.title}")
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse JSON from data-props: {e}")
-            logger.debug(f"Raw data: {decoded_props[:200]}...")
-            raise
+    for card in cards:
+        fixture = _parse_card(card)
+        fixtures.append(fixture)
+        logger.debug(f"Parsed fixture: {fixture.title}")
 
     logger.info(f"Successfully parsed {len(fixtures)} fixtures")
     return fixtures
@@ -91,8 +150,12 @@ def scrape_fixtures() -> list[FixtureData]:
 
     Raises:
         requests.RequestException: If fetching fails
-        json.JSONDecodeError: If parsing fails
-        pydantic.ValidationError: If data doesn't match schema
+        ValueError: If no fixtures are found, or a fixture card can't be
+            understood
     """
     html_content = fetch_page()
-    return extract_fixtures(html_content)
+    fixtures = extract_fixtures(html_content)
+    if not fixtures:
+        msg = f"No fixtures found on {TICKETING_URL}; the page layout may have changed"
+        raise ValueError(msg)
+    return fixtures
